@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskNote - Simple Task & Note Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">TaskNote</div>
+        <div class="nav-links">
+            <a href="index.html" class="active">Home</a>
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Welcome to TaskNote</h1>
+        <p>A simple place to manage your tasks and notes</p>
+        <div class="hero-buttons">
+            <a href="register.html" class="btn btn-primary">Get Started</a>
+            <a href="login.html" class="btn btn-secondary">Login</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2>What can you do?</h2>
+        <div class="feature-cards">
+            <div class="card">
+                <h3>Tasks</h3>
+                <p>Add tasks, mark them complete, and delete them when done</p>
+            </div>
+            <div class="card">
+                <h3>Notes</h3>
+                <p>Create notes, edit them anytime, and delete when no longer needed</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>TaskNote - Digital Marketing Project</p>
+    </footer>
+
+    <!-- Load the Supabase library (from a CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>
