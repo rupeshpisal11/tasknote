@@ -14,10 +14,14 @@ const SUPABASE_URL = "https://hatsxbpdyvbumutuoxdk.supabase.co";        // examp
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhdHN4YnBkeXZidW11dHVveGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg0MzUzNTMsImV4cCI6MjEwNDAxMTM1M30.kPUVcYdIcSRitEJadUHbUS18shtvQfcZQ4Z_C_fLFUo";   // long key that starts with "eyJ..."
 
 // Create the Supabase client (this lets us talk to our database)
-// If this line fails, a popup will tell us why
-let supabase;
+// IMPORTANT: The Supabase CDN library is loaded as a global object called
+// "supabase". We call supabase.createClient(...) on it to create OUR client.
+// We name ours "client" to avoid confusion with the library's "supabase".
+// If this line fails, a popup will tell us why.
+let client;
 try {
-    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log("Supabase client created successfully");
 } catch (err) {
     alert("Problem connecting: " + err.message + " (is the Supabase library loading?)");
 }
@@ -39,7 +43,7 @@ if (registerForm) {
         const password = document.getElementById("password").value;
 
         // 1) Create the account in Supabase (email + password)
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        const { data: authData, error: authError } = await client.auth.signUp({
             email: email,
             password: password
         });
@@ -51,7 +55,7 @@ if (registerForm) {
 
         // 2) Save the user's name in the "users" table
         //    authData.user.id is the unique id Supabase made for this person
-        const { error: dbError } = await supabase
+        const { error: dbError } = await client
             .from("users")
             .insert([
                 {
@@ -86,7 +90,7 @@ if (loginForm) {
         const password = document.getElementById("password").value;
 
         // Sign in with email + password
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await client.auth.signInWithPassword({
             email: email,
             password: password
         });
@@ -127,11 +131,11 @@ if (taskList) {
         const taskText = document.getElementById("taskInput").value;
 
         // Get the logged in user's id
-        const user = supabase.auth.getUser();
+        const user = client.auth.getUser();
         const userId = (await user).data.user.id;
 
         // Add the task to the database
-        const { error } = await supabase
+        const { error } = await client
             .from("tasks")
             .insert([
                 {
@@ -158,10 +162,10 @@ if (taskList) {
         const title = document.getElementById("noteTitle").value;
         const content = document.getElementById("noteContent").value;
 
-        const user = await supabase.auth.getUser();
+        const user = await client.auth.getUser();
         const userId = user.data.user.id;
 
-        const { error } = await supabase
+        const { error } = await client
             .from("notes")
             .insert([
                 {
@@ -184,7 +188,7 @@ if (taskList) {
     const logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.addEventListener("click", async (event) => {
         event.preventDefault();
-        await supabase.auth.signOut();
+        await client.auth.signOut();
         window.location.href = "login.html";
     });
 }
@@ -196,7 +200,7 @@ if (taskList) {
 
 // Make sure the user is logged in. If not, send them to login.
 async function checkLogin() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await client.auth.getUser();
     if (!user) {
         window.location.href = "login.html";
     }
@@ -204,10 +208,10 @@ async function checkLogin() {
 
 // Get the user's name from the "users" table and show it.
 async function showWelcome() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await client.auth.getUser();
     if (!user) return;
 
-    const { data, error } = await supabase
+    const { data, error } = await client
         .from("users")
         .select("name")
         .eq("id", user.id)
@@ -220,10 +224,10 @@ async function showWelcome() {
 
 // Load and show all tasks for the logged in user.
 async function loadTasks() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await client.auth.getUser();
     if (!user) return;
 
-    const { data, error } = await supabase
+    const { data, error } = await client
         .from("tasks")
         .select("*")
         .eq("user_id", user.id)
@@ -273,7 +277,7 @@ async function loadTasks() {
 
 // Mark a task as completed / not completed.
 async function toggleTask(id, completed) {
-    await supabase
+    await client
         .from("tasks")
         .update({ completed: completed })
         .eq("id", id);
@@ -282,7 +286,7 @@ async function toggleTask(id, completed) {
 
 // Delete a task.
 async function deleteTask(id) {
-    await supabase
+    await client
         .from("tasks")
         .delete()
         .eq("id", id);
@@ -291,10 +295,10 @@ async function deleteTask(id) {
 
 // Load and show all notes for the logged in user.
 async function loadNotes() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await client.auth.getUser();
     if (!user) return;
 
-    const { data, error } = await supabase
+    const { data, error } = await client
         .from("notes")
         .select("*")
         .eq("user_id", user.id)
@@ -364,7 +368,7 @@ function editNote(note) {
         const title = document.getElementById("noteTitle").value;
         const content = document.getElementById("noteContent").value;
 
-        await supabase
+        await client
             .from("notes")
             .update({ title: title, content: content })
             .eq("id", note.id);
@@ -378,7 +382,7 @@ function editNote(note) {
 
 // Delete a note.
 async function deleteNote(id) {
-    await supabase
+    await client
         .from("notes")
         .delete()
         .eq("id", id);
